@@ -1,0 +1,24 @@
+package com.example.mod.blocks;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
+
+public class ExperiencePlantBlock extends Block {
+    
+    private final int experienceAmount;
+
+    public ExperiencePlantBlock(int experienceAmount) {
+        super(Settings.of(Material.PLANT).noCollision().ticksRandomly().breakInstantly());
+        this.experienceAmount = experienceAmount;
+    }
+
+    @Override
+    public void onBlockBreakStart(BlockState state, World world, BlockPos pos, PlayerEntity player) {
+        // Reward the player with experience when they break the plant
+        player.addExperience(experienceAmount);
+    }
+}
