@@ -1,2 +1,2 @@
 # Experience-plant
-Gives experience will picked 1.20.1 fabric
+Gives experience when picked 1.20.1 fabric what more were you expecting.
