@@ -3,21 +3,52 @@ package com.barrow.revelations.blocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.particle.ParticleEffect;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class ExperiencePlantBlock extends Block {
-    
-    private final int experienceAmount;
+import java.util.function.Predicate;
 
-    public ExperiencePlantBlock(int experienceAmount) {
+public class ExperiencePlantBlock extends Block {
+
+    private final int experienceAmount;
+    private final ParticleEffect particleEffect;
+
+    public ExperiencePlantBlock(int experienceAmount, ParticleEffect particleEffect) {
         super(Settings.of(Material.PLANT).noCollision().ticksRandomly().breakInstantly());
         this.experienceAmount = experienceAmount;
+        this.particleEffect = particleEffect;
     }
 
     @Override
     public void onBlockBreakStart(BlockState state, World world, BlockPos pos, PlayerEntity player) {
         // Reward the player with experience when they break the plant
         player.addExperience(experienceAmount);
+
+        // Call super method to perform default block behavior
+        super.onBlockBreakStart(state, world, pos, player);
+    }
+
+    @Override
+    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
+        if (world instanceof ServerWorld) {
+            ServerWorld serverWorld = (ServerWorld) world;
+            ServerPlayerEntity player = serverWorld.getClosestPlayer(pos.getX(), pos.getY(), pos.getZ(), 50, this::canPlayerTriggerParticles);
+
+            if (player != null) {
+                double x = pos.getX() + 0.5;
+                double y = pos.getY() + 0.5;
+                double z = pos.getZ() + 0.5;
+                serverWorld.spawnParticles(particleEffect, x, y, z, 10, 0.5, 0.5, 0.5, 0);
+            }
+        }
+    }
+
+    private boolean canPlayerTriggerParticles(PlayerEntity player) {
+        // Customize this method to define conditions under which particles should be emitted
+        return true; // For demonstration purposes, emitting particles for any player within range
     }
 }
